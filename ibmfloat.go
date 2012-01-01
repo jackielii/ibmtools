@@ -3,6 +3,7 @@ package ibmtools
 import "math"
 
 const p24 = 2 << 23
+
 // Endianness big endian:
 // http://upload.wikimedia.org/wikipedia/commons/d/d5/Endianessmap.svg
 // IBM floating point architecture:
@@ -23,6 +24,5 @@ func Ibm32frombits(b [4]byte) float64 {
 	sign := 1 - 2*float64(ui>>31&0x01)
 	exponent := math.Pow(16.0, float64(ui>>24&0x7f)-64.0)
 	mantissa := float64(ui&0x00ffffff) / float64(p24)
-	// println(sign, " ", exponent, " ", mantissa)
 	return math.Copysign(mantissa*exponent, sign)
 }
