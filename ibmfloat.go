@@ -1,8 +1,7 @@
 package ibmtools
 
-import "math"
-
-const p24 = 2 << 23
+const e24 = 16777216.0 // 2^24
+const one uint64 = 1
 
 // Endianness big endian:
 // http://upload.wikimedia.org/wikipedia/commons/d/d5/Endianessmap.svg
@@ -20,9 +19,15 @@ const p24 = 2 << 23
     bias +64
 */
 func Ibm32frombits(b [4]byte) float64 {
-	ui := uint32(b[3]) | uint32(b[2])<<8 | uint32(b[1])<<16 | uint32(b[0])<<24
-	sign := 1 - 2*float64(ui>>31&0x01)
-	exponent := math.Pow(16.0, float64(ui>>24&0x7f)-64.0)
-	mantissa := float64(ui&0x00ffffff) / float64(p24)
-	return math.Copysign(mantissa*exponent, sign)
+	var sign float64
+	if b[0]>>7 == 0 {
+		sign = 1.0
+	} else {
+		sign = -1.0
+	}
+	return sign * float64(one<<(4*(b[0]&0x7f-64))) *
+		float64(uint32(b[3])|uint32(b[2])<<8|uint32(b[1])<<16) / e24
+	//exponent := 1 << (4 * (b[0]&0x7f - 64))
+	//mantissa := float64(uint32(b[3])|uint32(b[2])<<8|uint32(b[1])<<16) / e24
+	//return sign*mantissa*float64(exponent)
 }
